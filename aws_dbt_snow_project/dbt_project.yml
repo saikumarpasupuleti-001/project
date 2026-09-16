@@ -1,0 +1,48 @@
+
+name: 'aws_dbt_snow_project'
+version: '1.0.0'
+
+profile: 'aws_dbt_snow_project'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+
+models:
+  aws_dbt_snow_project:
+    bronz:
+      +materialized: table
+      +schema: BRONZE
+    silver:
+      +materialized: table
+      +schema: SILVER
+    gold:
+      +materialized: table
+      +schema: GOLD
+
+# ──────────────────────────────────────────
+# Metadata-driven OBT pipeline configuration
+# Change join keys / models here — no SQL edits needed
+# ──────────────────────────────────────────
+vars:
+  obt_config:
+    base:
+      model: silver_bookings
+      alias: sb
+    joins:
+      - model: silver_listings
+        alias: sl
+        join_type: LEFT JOIN
+        left_key: LISTING_ID
+        left_alias: sb
+        right_key: LISTING_ID
+      - model: silver_hosts
+        alias: sh
+        join_type: LEFT JOIN
+        left_key: HOST_ID
+        left_alias: sl
+        right_key: HOST_ID
